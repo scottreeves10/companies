@@ -1,0 +1,89 @@
+---
+title: "Map of Local Companies"
+author: "Scott Reeves"
+date: "June 23, 2018"
+output: html_document
+---
+
+```{r knitr options}
+knitr::opts_chunk$set(comment = "#>",collapse = TRUE,cache = TRUE, fig.path = "images/",out.width = "100%",fig.align = 'center',fig.width = 10, fig.asp = 1)
+
+```
+
+
+
+```{r packages message=FALSE, warning=FALSE}
+
+library(tmap) 
+library(tmaptools)
+# library(grid)
+library(sf)
+library(tidyverse)
+library(ggmap)
+library(leaflet)
+
+
+```
+
+
+# Data
+
+## Obtain geocodes from addresses
+
+```{r readorigcsv}
+
+# Geocoding a csv column of "addresses" in R
+
+file <- "C://Users/Scott/Documents/R/companies.csv"
+
+# Read in the CSV data and store it in a variable 
+origAddress <- read.csv(file, stringsAsFactors = FALSE, fileEncoding = "UTF-8-BOM")
+
+# Initialize the data frame
+geocoded <- data.frame(stringsAsFactors = FALSE)
+```
+
+
+
+```{r geoloop, message=FALSE, warning=FALSE}
+# Loop through the addresses to get the latitude and longitude of each address and add it to the
+# origAddress data frame in new columns lat and lon
+for(i in 1:nrow(origAddress))
+{
+  # Print("Working...")
+  result <- geocode(origAddress$co_address[i], output = "latlona", source = "google")
+  origAddress$lon[i] <- as.numeric(result[1])
+  origAddress$lat[i] <- as.numeric(result[2])
+  origAddress$geoAddress[i] <- as.character(result[3])
+}
+```
+
+```{r outputgeocodedcsv}
+# Write a CSV file containing origAddress to the working directory
+write.csv(origAddress, "geocoded.csv", row.names=FALSE)
+```
+
+```{r}
+origAddress
+```
+
+
+# Map
+
+```{r}
+m <- leaflet() %>% setView(lng = -84.4, lat = 33.9, zoom = 12)
+m %>% addTiles()
+```
+
+
+
+```{r message=FALSE, warning=FALSE}
+
+tmap_mode(mode = "plot")
+
+tm_shape() +
+  tm_polygons(col = "MAP_COLORS")
+
+```
+
+
